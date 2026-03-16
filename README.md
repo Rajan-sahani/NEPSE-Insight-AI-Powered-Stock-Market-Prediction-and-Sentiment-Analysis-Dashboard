@@ -1,6 +1,4 @@
-# 📊 NEPSE AI Analytics — Complete Market Intelligence Platform
-
-> **Professional end-to-end data science application for Nepal Stock Exchange**  
+# 📊 NEPSE AI Analytics — Complete Market Intelligence Platform 
 > Machine Learning · NLP Sentiment · Anomaly Detection · Portfolio Optimization · Flask Web App
 
 ---
@@ -39,7 +37,6 @@ major_project/
 
 ---
 
-## 🚀 Quick Start
 
 ### 1. Install dependencies
 ```bash
@@ -49,7 +46,6 @@ pip install flask pandas numpy scikit-learn joblib matplotlib
 
 ### 2. Run the application
 ```bash
-cd major_project
 python app.py
 ```
 
