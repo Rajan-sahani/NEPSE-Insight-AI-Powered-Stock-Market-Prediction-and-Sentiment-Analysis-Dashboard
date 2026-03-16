@@ -1,6 +1,17 @@
 # 📊 NEPSE AI Analytics — Complete Market Intelligence Platform 
 > Machine Learning · NLP Sentiment · Anomaly Detection · Portfolio Optimization · Flask Web App
 
+
+## 📌 About the Project
+
+NEPSE AI Analytics is a machine learning powered platform that
+provides stock prediction, sentiment analysis, anomaly detection,
+and portfolio optimization for the Nepal Stock Exchange (NEPSE).
+
+The system integrates financial data, news sentiment, and
+technical indicators to deliver actionable market insights
+through an interactive dashboard.
+
 ---
 
 ## 🏗️ Project Architecture
