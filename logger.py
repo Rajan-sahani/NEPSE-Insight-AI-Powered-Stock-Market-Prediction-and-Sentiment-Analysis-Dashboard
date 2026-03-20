@@ -8,6 +8,7 @@ LOG_FILE = os.path.join(LOG_DIR, "app.log")
 
 logging.basicConfig(
     filename=LOG_FILE,
+    filemode="w",  
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S"

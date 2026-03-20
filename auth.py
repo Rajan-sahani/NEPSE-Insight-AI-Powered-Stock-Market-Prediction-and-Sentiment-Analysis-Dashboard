@@ -17,23 +17,23 @@ def _hash(password: str) -> str:
 
 USERS = {
     "admin": {
-        "password_hash": _hash("nepse2024"),
+        "password_hash": _hash("rajan123"),
         "role": "admin",
         "name": "System Administrator",
         "email": "admin@nepse.ai",
     },
     "analyst": {
-        "password_hash": _hash("nepse2024"),
+        "password_hash": _hash("anlyst123"),
         "role": "analyst",
         "name": "Market Analyst",
         "email": "analyst@nepse.ai",
     },
-    "demo": {
-        "password_hash": _hash("demo123"),
-        "role": "viewer",
-        "name": "Demo User",
-        "email": "demo@nepse.ai",
-    },
+    # "demo": {
+    #     "password_hash": _hash("demo123"),
+    #     "role": "viewer",
+    #     "name": "Demo User",
+    #     "email": "demo@nepse.ai",
+    # },
 }
 
 # Brute-force protection: track failed attempts per IP
