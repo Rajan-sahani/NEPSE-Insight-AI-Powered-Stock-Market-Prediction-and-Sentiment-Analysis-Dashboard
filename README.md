@@ -52,7 +52,6 @@ major_project/
 ### 1. Install dependencies
 ```bash
 pip install flask pandas numpy scikit-learn joblib matplotlib
-# Optional: pip install nltk plotly  (fallback scorer used if unavailable)
 ```
 
 ### 2. Run the application
