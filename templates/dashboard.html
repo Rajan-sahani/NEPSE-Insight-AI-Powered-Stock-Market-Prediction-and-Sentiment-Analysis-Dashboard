@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEPSE AI Analytics — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<style>
+:root {
+  --bg: #080c14;
+  --bg2: #0d1526;
+  --bg3: #111927;
+  --bg4: #162035;
+  --border: #1e2d45;
+  --border2: #243650;
+  --blue: #0ea5e9;
+  --blue2: #0369a1;
+  --green: #22c55e;
+  --red: #ef4444;
+  --gold: #f59e0b;
+  --purple: #a78bfa;
+  --text: #e2eaf6;
+  --text2: #7b92b0;
+  --text3: #445669;
+  --sidebar: 240px;
+  --header: 56px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ── */
+.header {
+  height: var(--header);
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  flex-shrink: 0;
+  z-index: 50;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.3px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.header-logo .icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--blue), var(--green));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+
+.header-sep { flex: 1; }
+
+.market-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.dot { width: 7px; height: 7px; border-radius: 50%; animation: blink 2s ease-in-out infinite; }
+.dot-green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.dot-red { background: var(--red); }
+.dot-gold { background: var(--gold); }
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.user-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 13px;
+  color: var(--text2);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.user-btn:hover { border-color: var(--blue); color: var(--text); }
+
+/* ── Layout ── */
+.layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: var(--sidebar);
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 12px 0;
+}
+
+.nav-section {
+  padding: 6px 12px 2px;
+  font-size: 10px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  font-size: 13.5px;
+  color: var(--text2);
+  cursor: pointer;
+  border-radius: 0;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+  user-select: none;
+}
+
+.nav-item:hover { background: var(--bg3); color: var(--text); }
+.nav-item.active {
+  background: rgba(14, 165, 233, 0.08);
+  color: var(--blue);
+  border-left-color: var(--blue);
+  font-weight: 500;
+}
+.nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+.nav-badge {
+  margin-left: auto;
+  padding: 2px 7px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+.badge-green { background: rgba(34, 197, 94, 0.15); color: var(--green); }
+.badge-red { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+.badge-gold { background: rgba(245, 158, 11, 0.15); color: var(--gold); }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text3);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Main Content ── */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background: var(--bg);
+}
+
+/* ── Tab Panels ── */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── Cards ── */
+.card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+}
+
+.card-title {
+  font-size: 13px;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.card-value {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.card-change {
+  font-size: 13px;
+  margin-top: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.pos { color: var(--green); }
+.neg { color: var(--red); }
+.neu { color: var(--gold); }
+
+.card-icon {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 28px;
+  opacity: 0.5;
+}
+
+/* ── Grid layouts ── */
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px; }
+.grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-bottom: 20px; }
+
+/* ── Page title ── */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+.page-sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+
+/* ── Select ── */
+.styled-select {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  padding: 9px 14px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237b92b0' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  padding-right: 34px;
+}
+.styled-select:focus { border-color: var(--blue); }
+
+/* ── Buttons ── */
+.btn {
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary { background: var(--blue2); color: white; border-color: var(--blue); }
+.btn-primary:hover { background: var(--blue); box-shadow: 0 4px 16px rgba(14,165,233,0.25); }
+.btn-secondary { background: var(--bg3); color: var(--text2); }
+.btn-secondary:hover { border-color: var(--border2); color: var(--text); }
+
+/* ── Table ── */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th {
+  text-align: left;
+  padding: 10px 12px;
+  color: var(--text3);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 500;
+}
+.data-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid rgba(30,45,69,0.5);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+}
+.data-table tr:hover td { background: rgba(14,165,233,0.03); }
+.data-table tr:last-child td { border-bottom: none; }
+
+/* ── Signal badges ── */
+.sig {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.sig-buy { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+.sig-sell { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+.sig-hold { background: rgba(245,158,11,0.12); color: var(--gold); border: 1px solid rgba(245,158,11,0.3); }
+.sig-critical { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+.sig-high { background: rgba(245,158,11,0.12); color: var(--gold); border: 1px solid rgba(245,158,11,0.3); }
+.sig-medium { background: rgba(14,165,233,0.12); color: var(--blue); border: 1px solid rgba(14,165,233,0.3); }
+
+/* ── Progress bar ── */
+.prog-bar {
+  height: 6px;
+  background: var(--bg4);
+  border-radius: 100px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.prog-fill { height: 100%; border-radius: 100px; transition: width 1s ease; }
+.prog-green { background: var(--green); }
+.prog-red { background: var(--red); }
+.prog-gold { background: var(--gold); }
+.prog-blue { background: var(--blue); }
+
+/* ── Sentiment pie placeholder ── */
+.sentiment-ring-wrap { display: flex; align-items: center; gap: 24px; }
+.sentiment-labels { flex: 1; }
+.sentiment-label-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.s-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.s-name { font-size: 13px; color: var(--text2); flex: 1; }
+.s-val { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; }
+
+/* ── Chart container ── */
+.chart-box { position: relative; }
+.chart-box canvas { width: 100% !important; }
+
+/* ── Loader ── */
+.inline-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 40px;
+  color: var(--text3);
+  font-size: 13px;
+}
+.spin { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Movers list ── */
+.mover-row {
+  display: flex;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(30,45,69,0.5);
+  gap: 12px;
+}
+.mover-row:last-child { border-bottom: none; }
+.mover-sym { font-weight: 600; font-size: 13px; font-family: 'JetBrains Mono', monospace; color: var(--text); min-width: 60px; }
+.mover-price { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text2); flex: 1; }
+.mover-chg { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; }
+
+/* ── Chatbot ── */
+.chat-layout { display: grid; grid-template-columns: 1fr 340px; gap: 20px; height: calc(100vh - 160px); }
+.chat-window {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.chat-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg4);
+}
+.chat-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--green)); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.chat-name { font-weight: 600; font-size: 14px; }
+.chat-status { font-size: 12px; color: var(--green); }
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.msg { display: flex; gap: 10px; max-width: 85%; animation: msgIn 0.2s ease; }
+.msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.msg-bubble {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.msg.bot .msg-bubble {
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.msg.user .msg-bubble {
+  background: var(--blue2);
+  color: white;
+}
+.msg.bot .msg-bubble strong { color: var(--blue); }
+.msg-time { font-size: 10px; color: var(--text3); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+.msg.user .msg-time { text-align: right; }
+
+@keyframes msgIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+.chat-input-row {
+  padding: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  background: var(--bg4);
+}
+.chat-input {
+  flex: 1;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13.5px;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.chat-input:focus { border-color: var(--blue); }
+.chat-input::placeholder { color: var(--text3); }
+.chat-send {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--blue2);
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.chat-send:hover { background: var(--blue); }
+
+.quick-questions { }
+.quick-q-title { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.quick-chips { display: flex; flex-direction: column; gap: 8px; }
+.chip {
+  padding: 9px 14px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12.5px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.chip:hover { border-color: var(--blue); color: var(--text); background: rgba(14,165,233,0.05); }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── Divider ── */
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text2);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* ── Prediction results ── */
+.pred-day-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
+.pred-day-card {
+  background: var(--bg4);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+}
+.pred-day { font-size: 11px; color: var(--text3); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; }
+.pred-price { font-size: 18px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+.pred-change { font-size: 12px; font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
+.pred-ci { font-size: 10px; color: var(--text3); font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
+
+/* ── Anomaly severity ── */
+.sev-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(30,45,69,0.5); }
+.sev-row:last-child { border-bottom: none; }
+.sev-dot-wrap { padding-top: 3px; }
+.sev-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.sev-info { flex: 1; }
+.sev-date { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); }
+.sev-explain { font-size: 13px; color: var(--text); margin-top: 2px; }
+.sev-price { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text2); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <a href="#" class="header-logo">
+    <div class="icon">📊</div>
+    NEPSE AI Analytics
+  </a>
+  <span style="font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-left:8px;">v2.0</span>
+  <div class="header-sep"></div>
+  <div class="market-badge">
+    <span class="dot dot-green"></span>
+    <span id="mood-badge" style="color:var(--green)">BULLISH</span>
+  </div>
+  <div class="market-badge">
+    <span style="color:var(--text3)">ADV</span>
+    <span id="hdr-adv" class="pos">{{ market_summary.advances }}</span>
+    <span style="color:var(--text3)">DEC</span>
+    <span id="hdr-dec" class="neg">{{ market_summary.declines }}</span>
+  </div>
+  <a href="/logout" class="user-btn">
+    👤 {{ user.name }} &nbsp;·&nbsp; Logout
+  </a>
+</div>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="nav-section">Overview</div>
+    <div class="nav-item active" onclick="showTab('overview')">
+      <span class="icon">🏠</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showTab('market')">
+      <span class="icon">📈</span> Market Watch
+    </div>
+
+    <div class="nav-section">Analytics</div>
+    <div class="nav-item" onclick="showTab('prediction')">
+      <span class="icon">🔮</span> Prediction
+    </div>
+    <div class="nav-item" onclick="showTab('sentiment')">
+      <span class="icon">💬</span> Sentiment
+    </div>
+    <div class="nav-item" onclick="showTab('anomaly')">
+      <span class="icon">⚠️</span> Anomalies
+      {% if market_summary.declines > market_summary.advances %}
+        <span class="nav-badge badge-red">ALERT</span>
+      {% else %}
+        <span class="nav-badge badge-green">OK</span>
+      {% endif %}
+    </div>
+
+    <div class="nav-section">Investment</div>
+    <div class="nav-item" onclick="showTab('portfolio')">
+      <span class="icon">💼</span> Portfolio
+    </div>
+    <div class="nav-item" onclick="showTab('chatbot')">
+      <span class="icon">🤖</span> AI Chatbot
+    </div>
+
+    <div class="sidebar-footer">
+      Last updated:<br>{{ loaded_at[:10] }}
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="main" id="main-content">
+
+    <!-- ─── OVERVIEW TAB ─── -->
+    <div class="tab-panel active" id="tab-overview">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Market Overview</div>
+          <div class="page-sub">Nepal Stock Exchange — Real-Time Intelligence</div>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="grid-4">
+        <div class="card">
+          <div class="card-title">Market Mood</div>
+          <div class="card-value" id="ov-mood" style="font-size:22px">—</div>
+          <div class="card-change" id="ov-score">Loading...</div>
+          <div class="card-icon">🌡️</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Advances</div>
+          <div class="card-value pos">{{ market_summary.advances }}</div>
+          <div class="card-change pos">↑ stocks gained</div>
+          <div class="card-icon">📈</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Declines</div>
+          <div class="card-value neg">{{ market_summary.declines }}</div>
+          <div class="card-change neg">↓ stocks fell</div>
+          <div class="card-icon">📉</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Total Turnover</div>
+          <div class="card-value" style="font-size:18px">NPR {{ "{:,.0f}".format(market_summary.total_turnover / 1e6) }}M</div>
+          <div class="card-change neu">{{ market_summary.total_symbols }} active symbols</div>
+          <div class="card-icon">💰</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Top Gainers -->
+        <div class="card">
+          <div class="section-title">🏆 Top Gainers</div>
+          {% for s in market_summary.top_gainers %}
+          <div class="mover-row">
+            <div class="mover-sym">{{ s.Symbol }}</div>
+            <div class="mover-price">NPR {{ "%.2f"|format(s.close) }}</div>
+            <div class="mover-chg pos">+{{ "%.2f"|format(s.per_change) }}%</div>
+          </div>
+          {% endfor %}
+        </div>
+        <!-- Top Losers -->
+        <div class="card">
+          <div class="section-title">📉 Top Losers</div>
+          {% for s in market_summary.top_losers %}
+          <div class="mover-row">
+            <div class="mover-sym">{{ s.Symbol }}</div>
+            <div class="mover-price">NPR {{ "%.2f"|format(s.close) }}</div>
+            <div class="mover-chg neg">{{ "%.2f"|format(s.per_change) }}%</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Quick Portfolio Snapshot -->
+      <div class="card">
+        <div class="section-title">💼 Top Portfolio Picks (AI Recommended)</div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Symbol</th><th>Sector</th><th>Price (NPR)</th>
+              <th>Target (NPR)</th><th>Upside</th><th>Score</th><th>Rating</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in portfolio.portfolio[:8] %}
+            <tr>
+              <td style="font-weight:600;color:var(--text)">{{ s.symbol }}</td>
+              <td style="color:var(--text2)">{{ s.sector }}</td>
+              <td>{{ "%.2f"|format(s.current_price) }}</td>
+              <td>{{ "%.2f"|format(s.target_price) }}</td>
+              <td class="{{ 'pos' if s.upside_pct > 0 else 'neg' }}">{{ "%+.1f"|format(s.upside_pct) }}%</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="prog-bar" style="width:60px;margin:0">
+                    <div class="prog-fill prog-blue" style="width:{{ (s.composite_score*100)|int }}%"></div>
+                  </div>
+                  <span style="font-size:11px;font-family:'JetBrains Mono',monospace">{{ "%.2f"|format(s.composite_score) }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="sig {{ 'sig-buy' if 'BUY' in s.rating else 'sig-sell' if 'AVOID' in s.rating else 'sig-hold' }}">
+                  {{ s.rating }}
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─── MARKET WATCH TAB ─── -->
+    <div class="tab-panel" id="tab-market">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Market Watch</div>
+          <div class="page-sub">Live OHLCV charts with technical indicators</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-left:auto;align-items:center">
+          <select class="styled-select" id="market-symbol-select" onchange="loadStockChart()">
+            {% for sym in symbols %}
+            <option value="{{ sym }}" {% if sym == 'NABIL' %}selected{% endif %}>{{ sym }}</option>
+            {% endfor %}
+          </select>
+          <button class="btn btn-primary" onclick="loadStockChart()">📊 Load Chart</button>
+        </div>
+      </div>
+
+      <!-- Price KPIs -->
+      <div class="grid-4" id="stock-kpis">
+        <div class="card"><div class="card-title">Close Price</div><div class="card-value" id="kpi-close">—</div><div class="card-icon">💵</div></div>
+        <div class="card"><div class="card-title">Daily Change</div><div class="card-value" id="kpi-change">—</div><div class="card-icon">📊</div></div>
+        <div class="card"><div class="card-title">RSI (14)</div><div class="card-value" id="kpi-rsi">—</div><div class="card-icon">📡</div></div>
+        <div class="card"><div class="card-title">Volume</div><div class="card-value" id="kpi-vol" style="font-size:20px">—</div><div class="card-icon">🔊</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title">Price & Moving Averages</div>
+          <div class="chart-box" style="height:260px">
+            <canvas id="priceChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">RSI (14-Period)</div>
+          <div class="chart-box" style="height:260px">
+            <canvas id="rsiChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Volume Traded</div>
+        <div class="chart-box" style="height:160px">
+          <canvas id="volumeChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── PREDICTION TAB ─── -->
+    <div class="tab-panel" id="tab-prediction">
+      <div class="page-header">
+        <div>
+          <div class="page-title">AI Stock Prediction</div>
+          <div class="page-sub">Ensemble ML model: Random Forest + Gradient Boosting + Ridge</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-left:auto;align-items:center">
+          <select class="styled-select" id="pred-symbol-select">
+            {% for sym in symbols %}
+            <option value="{{ sym }}" {% if sym == 'NABIL' %}selected{% endif %}>{{ sym }}</option>
+            {% endfor %}
+          </select>
+          <button class="btn btn-primary" onclick="runPrediction()">🔮 Predict</button>
+        </div>
+      </div>
+
+      <div id="pred-loading" style="display:none" class="card">
+        <div class="inline-loader"><div class="spin"></div> Training model & generating forecast...</div>
+      </div>
+
+      <div id="pred-results" style="display:none">
+        <!-- 5-day cards -->
+        <div class="section-title">📅 5-Day Price Forecast</div>
+        <div class="pred-day-grid" id="pred-day-cards"></div>
+
+        <div class="grid-2-1">
+          <div class="card">
+            <div class="section-title">Price Chart + Forecast</div>
+            <div class="chart-box" style="height:280px">
+              <canvas id="predChart"></canvas>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-title">Model Performance</div>
+            <div id="pred-metrics"></div>
+            <div class="section-title" style="margin-top:20px">Top Features</div>
+            <div id="pred-features"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="pred-placeholder" class="card">
+        <div style="text-align:center;padding:40px;color:var(--text3)">
+          <div style="font-size:48px;margin-bottom:16px">🔮</div>
+          <div style="font-size:16px;color:var(--text2);margin-bottom:8px">Select a symbol and click Predict</div>
+          <div style="font-size:13px">Our ensemble model will generate 5-day price forecasts with confidence intervals</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SENTIMENT TAB ─── -->
+    <div class="tab-panel" id="tab-sentiment">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Market Sentiment</div>
+          <div class="page-sub">NLP analysis of {{ sentiment_summary.total_news_analyzed }} news articles + {{ sentiment_summary.total_posts_analyzed }} social posts</div>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">Market Mood</div>
+          <div class="card-value" style="font-size:24px;color:{{ sentiment_summary.mood_color }}">{{ sentiment_summary.market_mood }}</div>
+          <div class="card-change" style="font-family:'JetBrains Mono',monospace">Blended score: {{ "%+.4f"|format(sentiment_summary.blended_score) }}</div>
+          <div class="card-icon">🌡️</div>
+        </div>
+        <div class="card">
+          <div class="card-title">News Sentiment</div>
+          <div style="margin-top:8px">
+            <div class="sentiment-label-row">
+              <div class="s-dot" style="background:var(--green)"></div>
+              <div class="s-name">Positive</div>
+              <div class="s-val pos">{{ sentiment_summary.news_distribution.Positive }}%</div>
+            </div>
+            <div class="prog-bar"><div class="prog-fill prog-green" style="width:{{ sentiment_summary.news_distribution.Positive }}%"></div></div>
+            <div class="sentiment-label-row" style="margin-top:10px">
+              <div class="s-dot" style="background:var(--red)"></div>
+              <div class="s-name">Negative</div>
+              <div class="s-val neg">{{ sentiment_summary.news_distribution.Negative }}%</div>
+            </div>
+            <div class="prog-bar"><div class="prog-fill prog-red" style="width:{{ sentiment_summary.news_distribution.Negative }}%"></div></div>
+            <div class="sentiment-label-row" style="margin-top:10px">
+              <div class="s-dot" style="background:var(--gold)"></div>
+              <div class="s-name">Neutral</div>
+              <div class="s-val neu">{{ sentiment_summary.news_distribution.Neutral }}%</div>
+            </div>
+            <div class="prog-bar"><div class="prog-fill prog-gold" style="width:{{ sentiment_summary.news_distribution.Neutral }}%"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Social Sentiment</div>
+          <div style="margin-top:8px">
+            <div class="sentiment-label-row">
+              <div class="s-dot" style="background:var(--green)"></div>
+              <div class="s-name">Positive</div>
+              <div class="s-val pos">{{ sentiment_summary.social_distribution.Positive }}%</div>
+            </div>
+            <div class="prog-bar"><div class="prog-fill prog-green" style="width:{{ sentiment_summary.social_distribution.Positive }}%"></div></div>
+            <div class="sentiment-label-row" style="margin-top:10px">
+              <div class="s-dot" style="background:var(--red)"></div>
+              <div class="s-name">Negative</div>
+              <div class="s-val neg">{{ sentiment_summary.social_distribution.Negative }}%</div>
+            </div>
+            <div class="prog-bar"><div class="prog-fill prog-red" style="width:{{ sentiment_summary.social_distribution.Negative }}%"></div></div>
+            <div class="sentiment-label-row" style="margin-top:10px">
+              <div class="s-dot" style="background:var(--gold)"></div>
+              <div class="s-name">Neutral</div>
+              <div class="s-val neu">{{ sentiment_summary.social_distribution.Neutral }}%</div>
+            </div>
+            <div class="prog-bar"><div class="prog-fill prog-gold" style="width:{{ sentiment_summary.social_distribution.Neutral }}%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title">📅 Daily Sentiment Trend (30 days)</div>
+          <div class="chart-box" style="height:220px">
+            <canvas id="sentimentTrendChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">🏦 Sector Sentiment Breakdown</div>
+          <div class="chart-box" style="height:220px">
+            <canvas id="sectorSentimentChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── ANOMALY TAB ─── -->
+    <div class="tab-panel" id="tab-anomaly">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Anomaly Detection</div>
+          <div class="page-sub">Isolation Forest + Z-score + IQR multi-method detection</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-left:auto;align-items:center">
+          <select class="styled-select" id="anomaly-symbol-select">
+            {% for sym in symbols %}
+            <option value="{{ sym }}" {% if sym == 'NABIL' %}selected{% endif %}>{{ sym }}</option>
+            {% endfor %}
+          </select>
+          <button class="btn btn-primary" onclick="loadAnomalies()">⚡ Scan</button>
+        </div>
+      </div>
+
+      <div id="anomaly-results" class="card">
+        <div class="inline-loader" id="anomaly-placeholder">
+          <div>Select a symbol and click Scan to detect anomalies</div>
+        </div>
+        <div id="anomaly-stats" style="display:none">
+          <div class="grid-3" style="margin-bottom:20px">
+            <div style="background:var(--bg4);border:1px solid var(--border);border-radius:10px;padding:16px">
+              <div class="card-title">Total Anomalies</div>
+              <div class="card-value" id="an-total">—</div>
+            </div>
+            <div style="background:var(--bg4);border:1px solid var(--border);border-radius:10px;padding:16px">
+              <div class="card-title">Critical Events</div>
+              <div class="card-value neg" id="an-critical">—</div>
+            </div>
+            <div style="background:var(--bg4);border:1px solid var(--border);border-radius:10px;padding:16px">
+              <div class="card-title">Anomaly Rate</div>
+              <div class="card-value neu" id="an-rate">—</div>
+            </div>
+          </div>
+          <div class="section-title">Recent Anomaly Events</div>
+          <div id="anomaly-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── PORTFOLIO TAB ─── -->
+    <div class="tab-panel" id="tab-portfolio">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Portfolio Recommendations</div>
+          <div class="page-sub">Multi-factor AI ranking: Fundamentals + Technicals + Sentiment</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-left:auto;align-items:center">
+          <select class="styled-select" id="risk-select" onchange="loadPortfolio()">
+            <option value="conservative">🛡️ Conservative</option>
+            <option value="moderate" selected>⚖️ Moderate</option>
+            <option value="aggressive">⚡ Aggressive</option>
+          </select>
+          <button class="btn btn-primary" onclick="loadPortfolio()">💼 Build Portfolio</button>
+        </div>
+      </div>
+
+      <div class="grid-3" id="port-summary">
+        <div class="card">
+          <div class="card-title">Symbols Analyzed</div>
+          <div class="card-value">{{ portfolio.total_symbols_analyzed }}</div>
+          <div class="card-icon">🔍</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Buy Signals</div>
+          <div class="card-value pos">{{ portfolio.buy_count }}</div>
+          <div class="card-icon">✅</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Avg Expected Upside</div>
+          <div class="card-value {{ 'pos' if portfolio.avg_expected_upside > 0 else 'neg' }}">{{ "%+.1f"|format(portfolio.avg_expected_upside) }}%</div>
+          <div class="card-icon">📐</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title">Sector Allocation</div>
+          <div class="chart-box" style="height:240px">
+            <canvas id="sectorAllocChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">Score Distribution</div>
+          <div class="chart-box" style="height:240px">
+            <canvas id="scoreDistChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Top 20 Ranked Stocks</div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Symbol</th><th>Sector</th><th>Price</th><th>Target</th>
+              <th>Upside</th><th>Tech</th><th>Fund</th><th>Sent</th><th>Total</th><th>Rating</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in portfolio.recommendations %}
+            <tr>
+              <td style="color:var(--text3)">{{ loop.index }}</td>
+              <td style="font-weight:600;color:var(--text)">{{ s.symbol }}</td>
+              <td style="color:var(--text2)">{{ s.sector }}</td>
+              <td>{{ "%.2f"|format(s.current_price) }}</td>
+              <td>{{ "%.2f"|format(s.target_price) }}</td>
+              <td class="{{ 'pos' if s.upside_pct > 0 else 'neg' }}">{{ "%+.1f"|format(s.upside_pct) }}%</td>
+              <td style="color:var(--text2)">{{ "%.2f"|format(s.technical_score) }}</td>
+              <td style="color:var(--text2)">{{ "%.2f"|format(s.fundamental_score) }}</td>
+              <td style="color:var(--text2)">{{ "%.2f"|format(s.sentiment_score) }}</td>
+              <td style="font-weight:600">{{ "%.3f"|format(s.composite_score) }}</td>
+              <td>
+                <span class="sig {{ 'sig-buy' if 'BUY' in s.rating else 'sig-sell' if 'AVOID' in s.rating else 'sig-hold' }}">
+                  {{ s.rating }}
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─── CHATBOT TAB ─── -->
+    <div class="tab-panel" id="tab-chatbot">
+      <div class="page-header">
+        <div>
+          <div class="page-title">AI Market Assistant</div>
+          <div class="page-sub">Ask anything about NEPSE stocks, trends, and investment strategies</div>
+        </div>
+      </div>
+
+      <div class="chat-layout">
+        <div class="chat-window">
+          <div class="chat-header">
+            <div class="chat-avatar">🤖</div>
+            <div>
+              <div class="chat-name">NEPSE AI Assistant</div>
+              <div class="chat-status">● Online — Market data loaded</div>
+            </div>
+          </div>
+          <div class="chat-messages" id="chat-messages">
+            <div class="msg bot">
+              <div>
+                <div class="msg-bubble">
+                  Namaste! 🙏 I'm your NEPSE AI assistant. I have access to live market data, sentiment analysis, and portfolio recommendations.<br><br>
+                  Ask me about stock prices, sector trends, predictions, or investment strategies!
+                </div>
+                <div class="msg-time">Just now</div>
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-row">
+            <input type="text" class="chat-input" id="chat-input" placeholder="Ask about NEPSE stocks, trends, analysis..." onkeydown="if(event.key==='Enter')sendChat()">
+            <button class="chat-send" onclick="sendChat()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="card quick-questions">
+            <div class="quick-q-title">Quick Questions</div>
+            <div class="quick-chips">
+              <div class="chip" onclick="sendQuick('What is the NEPSE market trend today?')">📈 What is the NEPSE trend today?</div>
+              <div class="chip" onclick="sendQuick('Which stocks should I buy right now?')">🏆 Which stocks should I buy?</div>
+              <div class="chip" onclick="sendQuick('What is the sentiment for banking sector?')">🏦 Banking sector sentiment?</div>
+              <div class="chip" onclick="sendQuick('Are there any market anomalies detected?')">⚠️ Any anomalies detected?</div>
+              <div class="chip" onclick="sendQuick('Recommend a conservative portfolio for me')">🛡️ Conservative portfolio</div>
+              <div class="chip" onclick="sendQuick('Which stocks are undervalued by PE ratio?')">💡 Undervalued stocks?</div>
+              <div class="chip" onclick="sendQuick('What is the hydropower sector outlook?')">⚡ Hydropower outlook</div>
+              <div class="chip" onclick="sendQuick('Predict NABIL stock price for next week')">🔮 Predict NABIL price</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<script>
+// ── Tab management
+function showTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+
+  if (name === 'market') loadStockChart();
+  if (name === 'sentiment') renderSentimentCharts();
+  if (name === 'portfolio') renderPortfolioCharts();
+}
+
+// ── Overview: load sentiment badge
+fetch('/api/sentiment').then(r=>r.json()).then(d=>{
+  document.getElementById('ov-mood').textContent = d.market_mood;
+  document.getElementById('ov-mood').style.color = d.mood_color;
+  document.getElementById('ov-score').textContent = 'Score: ' + (d.blended_score > 0 ? '+' : '') + d.blended_score.toFixed(4);
+  document.getElementById('mood-badge').textContent = d.market_mood;
+  document.getElementById('mood-badge').style.color = d.mood_color;
+}).catch(()=>{});
+
+// ── Chart helpers
+const CHART_DEFAULTS = {
+  backgroundColor: 'transparent',
+  color: '#7b92b0',
+  borderColor: '#1e2d45',
+};
+
+function mkChart(id, config) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  if (ctx._chart) ctx._chart.destroy();
+  Chart.defaults.color = '#7b92b0';
+  Chart.defaults.borderColor = '#1e2d45';
+  ctx._chart = new Chart(ctx, config);
+  return ctx._chart;
+}
+
+// ── Market Watch
+let stockData = null;
+
+function loadStockChart() {
+  const sym = document.getElementById('market-symbol-select').value;
+  ['priceChart','rsiChart','volumeChart'].forEach(id=>{
+    const c = document.getElementById(id); if(c&&c._chart) c._chart.destroy();
+  });
+
+  fetch('/api/stock/' + sym).then(r=>r.json()).then(d=>{
+    stockData = d;
+    const last = d.close.length - 1;
+    const price = d.close[last];
+    const ret = d.daily_return[last] || 0;
+    const rsi = d.rsi[last];
+    const vol = d.volume[last];
+
+    document.getElementById('kpi-close').textContent = 'NPR ' + price.toFixed(2);
+    const chgEl = document.getElementById('kpi-change');
+    chgEl.textContent = (ret*100).toFixed(2) + '%';
+    chgEl.className = 'card-value ' + (ret>0?'pos':'neg');
+    const rsiEl = document.getElementById('kpi-rsi');
+    rsiEl.textContent = rsi ? rsi.toFixed(1) : '—';
+    rsiEl.className = 'card-value ' + (rsi > 70 ? 'neg' : rsi < 30 ? 'pos' : '');
+    document.getElementById('kpi-vol').textContent = vol ? vol.toLocaleString() : '—';
+
+    // Price chart
+    mkChart('priceChart', {
+      type: 'line',
+      data: {
+        labels: d.dates,
+        datasets: [
+          { label: 'Close', data: d.close, borderColor: '#0ea5e9', borderWidth: 2, pointRadius: 0, tension: 0.1, fill: false },
+          { label: 'MA10', data: d.ma10, borderColor: '#22c55e', borderWidth: 1.5, pointRadius: 0, tension: 0.3, borderDash: [4,2], fill: false },
+          { label: 'MA30', data: d.ma30, borderColor: '#f59e0b', borderWidth: 1.5, pointRadius: 0, tension: 0.3, borderDash: [8,4], fill: false },
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { font: { family: 'JetBrains Mono', size: 11 }, boxWidth: 16 } } }, scales: { x: { ticks: { maxTicksLimit: 8, font: { size: 10, family: 'JetBrains Mono' } } }, y: { ticks: { font: { size: 10, family: 'JetBrains Mono' } } } } }
+    });
+
+    // RSI chart
+    mkChart('rsiChart', {
+      type: 'line',
+      data: {
+        labels: d.dates,
+        datasets: [{ label: 'RSI(14)', data: d.rsi, borderColor: '#a78bfa', borderWidth: 2, pointRadius: 0, tension: 0.2, fill: false }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { font: { family: 'JetBrains Mono', size: 11 }, boxWidth: 16 } }, annotation: {} },
+        scales: {
+          x: { ticks: { maxTicksLimit: 8, font: { size: 10, family: 'JetBrains Mono' } } },
+          y: { min: 0, max: 100, ticks: { font: { size: 10, family: 'JetBrains Mono' } } }
+        }
+      }
+    });
+
+    // Volume chart
+    mkChart('volumeChart', {
+      type: 'bar',
+      data: {
+        labels: d.dates,
+        datasets: [{ label: 'Volume', data: d.volume, backgroundColor: 'rgba(14,165,233,0.35)', borderColor: '#0ea5e9', borderWidth: 1 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { maxTicksLimit: 8, font: { size: 10, family: 'JetBrains Mono' } } }, y: { ticks: { font: { size: 10, family: 'JetBrains Mono' } } } } }
+    });
+  });
+}
+
+// ── Prediction
+function runPrediction() {
+  const sym = document.getElementById('pred-symbol-select').value;
+  document.getElementById('pred-loading').style.display = 'block';
+  document.getElementById('pred-results').style.display = 'none';
+  document.getElementById('pred-placeholder').style.display = 'none';
+
+  fetch('/api/predict/' + sym).then(r=>r.json()).then(d=>{
+    document.getElementById('pred-loading').style.display = 'none';
+    if (d.error) { alert('Error: ' + d.error); return; }
+    document.getElementById('pred-results').style.display = 'block';
+
+    // 5-day cards
+    const grid = document.getElementById('pred-day-cards');
+    grid.innerHTML = '';
+    d.predictions.forEach(p => {
+      const cls = p.change_pct > 0 ? 'pos' : 'neg';
+      grid.innerHTML += `
+        <div class="pred-day-card">
+          <div class="pred-day">Day ${p.day}</div>
+          <div class="pred-price ${cls}">NPR ${p.predicted_price.toFixed(2)}</div>
+          <div class="pred-change ${cls}">${p.change_pct > 0 ? '+' : ''}${p.change_pct.toFixed(2)}%</div>
+          <div class="pred-ci">[${p.ci_low} – ${p.ci_high}]</div>
+          <div style="margin-top:8px"><span class="sig ${p.signal==='BUY'?'sig-buy':p.signal==='SELL'?'sig-sell':'sig-hold'}">${p.signal}</span></div>
+        </div>`;
+    });
+
+    // Combined chart: historical + forecast
+    const hist = d.historical_data || [];
+    const labels = hist.map(x=>x.Date).concat(d.predictions.map(p=>'Day '+p.day));
+    const histClose = hist.map(x=>x.close);
+    const forecastPrices = Array(hist.length).fill(null).concat(d.predictions.map(p=>p.predicted_price));
+    const histLast = histClose[histClose.length-1];
+
+    mkChart('predChart', {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Historical', data: histClose.concat([histLast]), borderColor: '#0ea5e9', borderWidth: 2, pointRadius: 0, tension: 0.1, fill: false },
+          { label: 'Forecast', data: Array(hist.length).fill(null).concat([histLast]).concat(d.predictions.map(p=>p.predicted_price)), borderColor: '#22c55e', borderWidth: 2.5, pointRadius: 4, borderDash: [6,3], tension: 0.2, fill: false },
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { font: { family:'JetBrains Mono', size:11 }, boxWidth: 16 } } }, scales: { x: { ticks: { maxTicksLimit:10, font:{ size:10, family:'JetBrains Mono' } } }, y: { ticks: { font:{ size:10, family:'JetBrains Mono' } } } } }
+    });
+
+    // Metrics
+    const m = d.model_metrics || {};
+    document.getElementById('pred-metrics').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${Object.entries(m).map(([k,v])=>`
+          <div style="background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:10px">
+            <div class="card-title">${k}</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;margin-top:4px">${v}</div>
+          </div>`).join('')}
+      </div>`;
+
+    // Feature importance
+    const fi = d.feature_importance || {};
+    const topFi = Object.entries(fi).slice(0, 6);
+    const maxFi = topFi[0]?.[1] || 1;
+    document.getElementById('pred-features').innerHTML = topFi.map(([k,v])=>`
+      <div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+          <span style="font-family:'JetBrains Mono',monospace;color:var(--text2)">${k}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3)">${(v*100).toFixed(1)}%</span>
+        </div>
+        <div class="prog-bar"><div class="prog-fill prog-blue" style="width:${(v/maxFi*100).toFixed(0)}%"></div></div>
+      </div>`).join('');
+  }).catch(e=>{
+    document.getElementById('pred-loading').style.display='none';
+    document.getElementById('pred-placeholder').style.display='block';
+  });
+}
+
+// ── Sentiment Charts
+function renderSentimentCharts() {
+  fetch('/api/sentiment').then(r=>r.json()).then(d=>{
+    // Daily trend
+    const trend = d.daily_sentiment_trend || [];
+    if (trend.length > 0) {
+      mkChart('sentimentTrendChart', {
+        type: 'line',
+        data: {
+          labels: trend.map(t=>t.date),
+          datasets: [{
+            label: 'Sentiment',
+            data: trend.map(t=>t.sentiment),
+            borderColor: '#0ea5e9',
+            backgroundColor: 'rgba(14,165,233,0.05)',
+            borderWidth: 2,
+            pointRadius: 2,
+            tension: 0.3,
+            fill: true,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { maxTicksLimit:8, font:{ size:10, family:'JetBrains Mono' } } },
+            y: { min: -0.5, max: 0.5, ticks: { font:{ size:10, family:'JetBrains Mono' } } }
+          }
+        }
+      });
+    }
+
+    // Sector sentiment
+    const sectors = d.sector_sentiment || [];
+    const colors = sectors.map(s => s.avg_sentiment > 0.05 ? 'rgba(34,197,94,0.7)' : s.avg_sentiment < -0.05 ? 'rgba(239,68,68,0.7)' : 'rgba(245,158,11,0.7)');
+    mkChart('sectorSentimentChart', {
+      type: 'bar',
+      data: {
+        labels: sectors.map(s=>s.sector),
+        datasets: [{ label: 'Avg Sentiment', data: sectors.map(s=>s.avg_sentiment), backgroundColor: colors, borderRadius: 4 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        indexAxis: 'y',
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { font:{ size:10, family:'JetBrains Mono' } } },
+          y: { ticks: { font:{ size:11 } } }
+        }
+      }
+    });
+  });
+}
+
+// ── Anomaly Detection
+function loadAnomalies() {
+  const sym = document.getElementById('anomaly-symbol-select').value;
+  const placeholder = document.getElementById('anomaly-placeholder');
+  const stats = document.getElementById('anomaly-stats');
+  placeholder.innerHTML = '<div class="spin"></div> Scanning for anomalies...';
+  placeholder.style.display = 'flex';
+  stats.style.display = 'none';
+
+  fetch('/api/anomalies/' + sym).then(r=>r.json()).then(d=>{
+    placeholder.style.display = 'none';
+    stats.style.display = 'block';
+    document.getElementById('an-total').textContent = d.total_count;
+    document.getElementById('an-critical').textContent = d.critical_count;
+    document.getElementById('an-rate').textContent = d.anomaly_rate + '%';
+
+    const list = document.getElementById('anomaly-list');
+    if (!d.anomalies || d.anomalies.length === 0) {
+      list.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:20px 0">No anomalies detected recently ✓</div>';
+      return;
+    }
+    list.innerHTML = d.anomalies.slice(0, 20).map(a => {
+      const cls = a.severity === 'CRITICAL' ? 'sig-critical' : a.severity === 'HIGH' ? 'sig-high' : 'sig-medium';
+      const dotColor = a.severity === 'CRITICAL' ? 'var(--red)' : a.severity === 'HIGH' ? 'var(--gold)' : 'var(--blue)';
+      return `
+        <div class="sev-row">
+          <div class="sev-dot-wrap"><div class="sev-dot" style="background:${dotColor}"></div></div>
+          <div class="sev-info">
+            <div class="sev-date">${a.date}</div>
+            <div class="sev-explain">${a.explanation}</div>
+            <div class="sev-price">Close: NPR ${a.close} &nbsp;|&nbsp; Change: <span class="${a.daily_return_pct>0?'pos':'neg'}">${a.daily_return_pct>0?'+':''}${a.daily_return_pct}%</span></div>
+          </div>
+          <span class="sig ${cls}">${a.severity}</span>
+        </div>`;
+    }).join('');
+  });
+}
+
+// ── Portfolio Charts
+function renderPortfolioCharts() {
+  const sectors = {{ portfolio.sector_distribution | tojson }};
+  const labels = Object.keys(sectors);
+  const values = Object.values(sectors);
+  const colors = ['#0ea5e9','#22c55e','#f59e0b','#a78bfa','#f43f5e','#06b6d4','#84cc16','#fb923c'];
+
+  mkChart('sectorAllocChart', {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data: values, backgroundColor: colors.slice(0, labels.length), borderWidth: 2, borderColor: 'var(--bg3)' }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'right', labels: { font: { size: 11 }, boxWidth: 12 } } }
+    }
+  });
+
+  const recs = {{ portfolio.recommendations | tojson }};
+  const scoreData = recs.map(r=>r.composite_score);
+  const scoreBins = Array.from({length:10}, (_,i)=>recs.filter(r=>r.composite_score>=i*0.1&&r.composite_score<(i+1)*0.1).length);
+
+  mkChart('scoreDistChart', {
+    type: 'bar',
+    data: {
+      labels: ['0.0','0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9'],
+      datasets: [{ label: 'Stocks', data: scoreBins, backgroundColor: 'rgba(14,165,233,0.5)', borderColor: '#0ea5e9', borderWidth: 1, borderRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { title: { display: true, text: 'Score Range', font: { size: 11 } }, ticks: { font:{ size:10, family:'JetBrains Mono' } } },
+        y: { title: { display: true, text: 'Count' }, ticks: { font:{ size:10, family:'JetBrains Mono' } }, stepSize: 1 }
+      }
+    }
+  });
+}
+
+function loadPortfolio() {
+  const risk = document.getElementById('risk-select').value;
+  fetch('/api/portfolio?risk=' + risk).then(r=>r.json()).then(d=>{
+    // Refresh summary KPIs
+    document.querySelector('#port-summary .card:nth-child(1) .card-value').textContent = d.total_symbols_analyzed;
+    document.querySelector('#port-summary .card:nth-child(2) .card-value').textContent = d.buy_count;
+    const upside = document.querySelector('#port-summary .card:nth-child(3) .card-value');
+    upside.textContent = (d.avg_expected_upside > 0 ? '+' : '') + d.avg_expected_upside.toFixed(1) + '%';
+    upside.className = 'card-value ' + (d.avg_expected_upside > 0 ? 'pos' : 'neg');
+    renderPortfolioCharts();
+  });
+}
+
+// ── Chatbot
+function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  appendMsg('user', msg);
+
+  fetch('/api/chat', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({message: msg})
+  }).then(r=>r.json()).then(d=>{
+    appendMsg('bot', d.response);
+  }).catch(()=>appendMsg('bot', 'Sorry, I encountered an error. Please try again.'));
+}
+
+function sendQuick(msg) {
+  document.getElementById('chat-input').value = msg;
+  sendChat();
+}
+
+function appendMsg(role, text) {
+  const container = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  const now = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'});
+  // Parse markdown for bot messages
+  const content = role === 'bot' ? marked.parse(text) : text.replace(/</g,'&lt;');
+  div.innerHTML = `
+    <div>
+      <div class="msg-bubble">${content}</div>
+      <div class="msg-time">${now}</div>
+    </div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+</script>
+</body>
+</html>
