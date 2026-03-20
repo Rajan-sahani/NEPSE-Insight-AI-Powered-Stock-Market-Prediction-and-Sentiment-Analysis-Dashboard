@@ -2,7 +2,7 @@
 > Machine Learning · NLP Sentiment · Anomaly Detection · Portfolio Optimization · Flask Web App
 
 
-## 📌 About the Project
+##  About the Project
 
 NEPSE AI Analytics is a machine learning powered platform that
 provides stock prediction, sentiment analysis, anomaly detection,
@@ -14,7 +14,7 @@ through an interactive dashboard.
 
 ---
 
-## 🏗️ Project Architecture
+##  Project Architecture
 
 ```
 major_project/
@@ -62,25 +62,25 @@ python app.py
 
 ### 3. Open browser
 ```
-http://localhost:5000
+* Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.7:5000
 ```
 
 ### 4. Login credentials
 | Username | Password  | Role    |
 |----------|-----------|---------|
-| admin    | nepse2024 | Admin   |
-| analyst  | nepse2024 | Analyst |
-| demo     | demo123   | Viewer  |
+| admin    | nepse2024 | Admin   |  
 
 ---
 
-## 🎯 Features
+##  Features
 
 ### 1. User Authentication
 - SHA-256 password hashing
 - Session-based access control
 - Brute-force protection (5 attempts → 5 min lockout)
-- Role-based access (admin / analyst / viewer)
+- Role-based access (admin)
 
 ### 2. Data Pipeline (`src/data_loader.py`)
 - Loads 249,759 stock records across 124 symbols
@@ -133,7 +133,7 @@ http://localhost:5000
 
 ---
 
-## 📡 API Endpoints
+##  API Endpoints
 
 | Endpoint | Description |
 |----------|-------------|
@@ -148,21 +148,20 @@ http://localhost:5000
 
 ---
 
-## 📓 Jupyter Notebook
+##  Jupyter Notebook
 
-`nepse_analysis_notebook.ipynb` covers:
-1. Environment setup with dark theme plotting
-2. Full EDA: price histories, return distributions, correlation heatmap
-3. Feature engineering walkthrough
-4. Sentiment analysis with visualizations
-5. Model training, evaluation, feature importance
-6. Anomaly detection with annotated charts
-7. Portfolio optimization across all risk profiles
-8. Master 6-panel market dashboard chart
+`Notebook.ipynb` covers:
+ Full EDA: price histories, return distributions, correlation heatmap
+ Feature engineering walkthrough
+ Sentiment analysis with visualizations
+ Model training, evaluation, feature importance
+ Anomaly detection with annotated charts
+ Portfolio optimization across all risk profiles
+ Master 6-panel market dashboard chart
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 | Layer | Technology |
 |-------|-----------|
